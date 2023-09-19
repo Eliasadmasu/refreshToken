@@ -51,14 +51,9 @@ const login = async (req, res) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      sameSite: "None",
-      maxAge: 60 * 1000,
-      secure: process.env.NODE_ENV === "production", // Set to true in production
-    });
+    const userId = user._id;
 
-    return res.status(200).json({ accessToken });
+    return res.status(200).json({ accessToken, refreshToken, userId });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
@@ -67,10 +62,7 @@ const login = async (req, res) => {
 
 const refreshTokens = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-    const auth = req;
-
-    console.log({ refreshToken });
+    const refreshToken = req.body.refreshToken;
 
     if (!refreshToken) {
       return res.status(403).json({ message: "No refresh token provided" });
@@ -92,6 +84,7 @@ const refreshTokens = async (req, res) => {
 
         // Generate a new access token
         const accessToken = generateAccessToken(user);
+        console.log("newAccessToken Generated", accessToken);
 
         // Send the new access token
         return res.status(200).json({ accessToken });

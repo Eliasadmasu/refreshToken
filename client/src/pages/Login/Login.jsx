@@ -26,10 +26,17 @@ const Login = () => {
     try {
       const response = await AuthService.login(credentials);
       if (response.status === 200) {
-        const accessToken = response.data.accessToken;
+        const { accessToken, refreshToken } = response.data;
 
         console.log("Login successful:", response);
-        Cookie.set("accessToken", accessToken);
+        Cookie.set("accessToken", accessToken, {
+          expires: 20 / 86400,
+          secure: true,
+        });
+        Cookie.set("refreshToken", refreshToken, {
+          expires: 20 / 1440,
+          secure: true,
+        });
         setAccessToken(accessToken);
         navigate("/protected");
       }
